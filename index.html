@@ -1,188 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Tic Tac Toe</title>
-
-  <!-- Manifest + PWA registration -->
-  <link rel="manifest" href="manifest.json" />
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(reg => console.log('Service Worker registered:', reg.scope))
-        .catch(err => console.error('Service Worker failed:', err));
-    }
-  </script>
-
+  <meta charset="UTF-8">
+  <title>My Photo Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-    }
-
-    html, body {
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #74ebd5, #9face6);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .game-container {
-      width: 100%;
-      max-width: 500px;
-      padding: 20px;
-      background-color: rgba(255, 255, 255, 0.85);
-      border-radius: 16px;
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    body {
+      font-family: sans-serif;
       text-align: center;
+      background: #f4f4f4;
+      padding: 20px;
     }
 
     h1 {
-      margin-bottom: 20px;
-      color: #333;
-      font-size: 2rem;
-    }
-
-    .board {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      margin-bottom: 20px;
-    }
-
-    .cell {
-      background: #ffffff;
-      border: 2px solid #444;
-      font-size: 3rem;
-      font-weight: bold;
-      color: #333;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      border-radius: 12px;
-      transition: background 0.2s ease, transform 0.1s;
-    }
-
-    .cell:hover {
-      background-color: #d0e4ff;
-      transform: scale(1.05);
-    }
-
-    .cell:active {
-      background-color: #b5d3ff;
-    }
-
-    .cell.X {
-      color: #ff4d4d;
-    }
-
-    .cell.O {
-      color: #2a9d8f;
-    }
-
-    #status {
-      font-size: 1.2rem;
-      color: #333;
       margin-bottom: 10px;
     }
 
-    #resetBtn {
-      padding: 10px 20px;
-      font-size: 1rem;
-      background: #2a9d8f;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.2s;
+    #fileInput {
+      padding: 10px;
+      margin-bottom: 20px;
+      font-size: 16px;
     }
 
-    #resetBtn:hover {
-      background: #24897d;
+    #gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    #gallery img {
+      width: 200px;
+      height: auto;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: transform 0.3s;
+    }
+
+    #gallery img:hover {
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 600px) {
+      #gallery img {
+        width: 100%;
+        max-width: 90%;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="game-container">
-    <h1>Tic Tac Toe</h1>
-    <div class="board" id="board"></div>
-    <p id="status">Player X's turn</p>
-    <button id="resetBtn">Reset Game</button>
-  </div>
+  <h1>📷 My Photo Viewer</h1>
+  <input type="file" id="fileInput" multiple accept="image/*">
+  <div id="gallery"></div>
 
   <script>
-    const board = document.getElementById('board');
-    const status = document.getElementById('status');
-    const resetBtn = document.getElementById('resetBtn');
+    const input = document.getElementById("fileInput");
+    const gallery = document.getElementById("gallery");
 
-    let currentPlayer = 'X';
-    let cells = Array(9).fill(null);
-    let gameOver = false;
+    input.addEventListener("change", () => {
+      gallery.innerHTML = ""; // Clear old images
+      const files = Array.from(input.files);
 
-    function createBoard() {
-      board.innerHTML = '';
-      cells.forEach((cell, index) => {
-        const div = document.createElement('div');
-        div.classList.add('cell');
-        if (cell) div.classList.add(cell);
-        div.dataset.index = index;
-        div.addEventListener('click', handleClick, { once: true });
-        div.textContent = cell || '';
-        board.appendChild(div);
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = document.createElement("img");
+          img.src = e.target.result;
+          gallery.appendChild(img);
+        };
+        reader.readAsDataURL(file);
       });
-    }
-
-    function handleClick(e) {
-      const index = e.target.dataset.index;
-      if (cells[index] || gameOver) return;
-
-      cells[index] = currentPlayer;
-      createBoard();
-
-      if (checkWinner()) {
-        status.textContent = `Player ${currentPlayer} wins!`;
-        gameOver = true;
-        return;
-      }
-
-      if (!cells.includes(null)) {
-        status.textContent = "It's a draw!";
-        gameOver = true;
-        return;
-      }
-
-      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-      status.textContent = `Player ${currentPlayer}'s turn`;
-    }
-
-    function checkWinner() {
-      const winCombos = [
-        [0,1,2], [3,4,5], [6,7,8],
-        [0,3,6], [1,4,7], [2,5,8],
-        [0,4,8], [2,4,6]
-      ];
-      return winCombos.some(combo =>
-        combo.every(index => cells[index] === currentPlayer)
-      );
-    }
-
-    resetBtn.addEventListener('click', () => {
-      cells = Array(9).fill(null);
-      currentPlayer = 'X';
-      gameOver = false;
-      status.textContent = `Player ${currentPlayer}'s turn`;
-      createBoard();
     });
-
-    createBoard();
   </script>
 </body>
 </html>
