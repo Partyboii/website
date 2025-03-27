@@ -1,77 +1,455 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>My Photo Viewer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Velasquez Install – Services Carousel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: sans-serif;
-      text-align: center;
-      background: #f4f4f4;
+      font-family: 'Inter', sans-serif;
+      background-color: #f4f6f8;
       padding: 20px;
+      margin: 0;
     }
 
     h1 {
+      text-align: center;
+      font-size: 2.25rem;
+      color: #222;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .carousel-hint {
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 15px;
+      color: #555;
+    }
+
+    .carousel-container {
+      position: relative;
+      max-width: 100%;
+      margin: auto;
+      overflow: hidden;
+    }
+
+    .carousel-track {
+      display: flex;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scroll-snap-type: x mandatory;
+      scroll-snap-stop: always;
+      -webkit-overflow-scrolling: touch;
+      gap: 10px;
+      padding-bottom: 20px;
+    }
+
+    .carousel-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .carousel-item {
+      flex: 0 0 100vw;
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+      background-color: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .carousel-item img {
+      width: 100%;
+      height: 50vh;
+      object-fit: cover;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 10px;
+      margin-bottom: 5px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ccc;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .dot:hover {
+      transform: scale(1.5);
+      background: #007bff;
+    }
+
+    .dot.active {
+      background: #007bff;
+      box-shadow: 0 0 6px rgba(0, 123, 255, 0.4);
+      transform: scale(1.4);
+    }
+
+    .carousel-info {
+      padding: 20px;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .carousel-info h3 {
+      font-weight: 600;
+      font-size: 20px;
       margin-bottom: 10px;
     }
 
-    #fileInput {
-      padding: 10px;
-      margin-bottom: 20px;
-      font-size: 16px;
-    }
-
-    #gallery {
+    .options {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
+      flex-direction: column;
       gap: 10px;
+      padding: 10px;
     }
 
-    #gallery img {
-      width: 200px;
-      height: auto;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      transition: transform 0.3s;
+    .options select {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
     }
 
-    #gallery img:hover {
-      transform: scale(1.05);
+    .options select.invalid {
+      border: 2px solid red;
     }
 
-    @media (max-width: 600px) {
-      #gallery img {
-        width: 100%;
-        max-width: 90%;
+    .add-to-cart {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .add-to-cart:hover {
+      background-color: #0056b3;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+    }
+
+    .error-message {
+      color: red;
+      font-size: 14px;
+      display: none;
+      margin-top: 10px;
+    }
+
+    .cart {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .cart h3 {
+      text-align: center;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
+    .cart-items {
+      list-style: none;
+      padding: 0;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .cart-total {
+      margin-top: 15px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .carousel-arrow {
+      position: absolute;
+      top: calc(25vh);
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(8px);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: #333;
+      cursor: pointer;
+      z-index: 10;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .carousel-arrow:hover {
+      background: #007bff;
+      color: #fff;
+    }
+
+    .carousel-arrow.left {
+      left: 10px;
+    }
+
+    .carousel-arrow.right {
+      right: 10px;
+    }
+
+    .clear-cart {
+      display: block;
+      margin: 10px auto 0;
+      background-color: #dc3545;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .clear-cart:hover {
+      background-color: #a71d2a;
+    }
+
+    @media (min-width: 768px) {
+      .carousel-item {
+        flex: 0 0 400px;
+        height: 700px;
+        scroll-snap-align: center;
+      }
+
+      .carousel-item img {
+        height: 50%;
+      }
+
+      .carousel-arrow {
+        top: 175px;
       }
     }
   </style>
 </head>
 <body>
-  <h1>📷 My Photo Viewer</h1>
-  <input type="file" id="fileInput" multiple accept="image/*">
-  <div id="gallery"></div>
+
+  <h1>Installation Services</h1>
+  <div class="carousel-hint">Swipe left or right to view all services</div>
+
+  <div class="carousel-container">
+    <button class="carousel-arrow left" onclick="scrollCarousel(-1)" aria-label="Scroll left">&#10094;</button>
+    <button class="carousel-arrow right" onclick="scrollCarousel(1)" aria-label="Scroll right">&#10095;</button>
+
+    <div class="carousel-track" id="carouselTrack"></div>
+    <div class="carousel-dots" id="globalDots"></div>
+  </div>
+
+  <div class="cart">
+    <h3>Cart</h3>
+    <ul class="cart-items" id="cartItems"></ul>
+    <div class="cart-total" id="cartTotal">Total: $0</div>
+    <button class="clear-cart" onclick="clearCart()">Clear Cart</button>
+  </div>
 
   <script>
-    const input = document.getElementById("fileInput");
-    const gallery = document.getElementById("gallery");
+    const services = [
+      {
+        name: 'TV',
+        img: 'tvsample.jpg',
+        desc: 'We professionally mount and secure your television for the best viewing experience.',
+        priceOptions: [
+          { label: 'Small TV - $80', value: 'Small TV', price: 80 },
+          { label: 'Medium TV - $100', value: 'Medium TV', price: 100 },
+          { label: 'Large TV - $120', value: 'Large TV', price: 120 }
+        ],
+        selects: [['Fixed Mount', 'Pivot Mount'], ['Sheet Rock', 'Concrete']]
+      },
+      {
+        name: 'Artwork',
+        img: 'artsample.jpg',
+        desc: 'We securely hang your artwork with care and precision to enhance your space.',
+        priceOptions: [
+          { label: 'Small - $50', value: 'Small', price: 50 },
+          { label: 'Medium - $65', value: 'Medium', price: 65 },
+          { label: 'Large - $80', value: 'Large', price: 80 }
+        ],
+        selects: [['Sheet Rock', 'Concrete']]
+      },
+      {
+        name: 'Mirror',
+        img: 'mirrorsample.jpg',
+        desc: 'We expertly mount mirrors of all sizes to enhance the beauty and function of your rooms.',
+        priceOptions: [
+          { label: 'Small - $60', value: 'Small', price: 60 },
+          { label: 'Medium - $75', value: 'Medium', price: 75 },
+          { label: 'Large - $90', value: 'Large', price: 90 }
+        ],
+        selects: [['Sheet Rock', 'Concrete']]
+      }
+    ];
 
-    input.addEventListener("change", () => {
-      gallery.innerHTML = ""; // Clear old images
-      const files = Array.from(input.files);
+    const track = document.getElementById('carouselTrack');
 
-      files.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = e => {
-          const img = document.createElement("img");
-          img.src = e.target.result;
-          gallery.appendChild(img);
-        };
-        reader.readAsDataURL(file);
+    function renderCarousel() {
+      track.innerHTML = '';
+      services.forEach((service, index) => {
+        const item = document.createElement('div');
+        item.className = 'carousel-item';
+
+        const priceOptions = service.priceOptions.map(opt =>
+          `<option value="${opt.value}" data-price="${opt.price}">${opt.label}</option>`
+        ).join('');
+
+        const extraSelects = service.selects.map((opts, i) =>
+          `<select><option value="">Select Option</option>${opts.map(opt => `<option>${opt}</option>`).join('')}</select>`
+        ).join('');
+
+        item.innerHTML = `
+          <img src="${service.img}" alt="${service.name}" onerror="this.src='https://via.placeholder.com/800x400?text=Image+Unavailable'">
+          <div class="carousel-info">
+            <h3>${service.name}</h3>
+            <p>${service.desc}</p>
+            <div class="options">
+              <select data-price-select>
+                <option value="">Select Size</option>
+                ${priceOptions}
+              </select>
+              ${extraSelects}
+            </div>
+            <button class="add-to-cart" onclick="addToCart(this, '${service.name}')">Add to Cart</button>
+            <p class="error-message">Please select all options before adding to cart.</p>
+          </div>
+        `;
+        track.appendChild(item);
       });
+      createDots();
+    }
+
+    function createDots() {
+      const dotsContainer = document.getElementById('globalDots');
+      dotsContainer.innerHTML = '';
+      services.forEach((_, idx) => {
+        const dot = document.createElement('div');
+        dot.classList.add('dot');
+        if (idx === 0) dot.classList.add('active');
+        dot.addEventListener('click', () => {
+          const scrollTo = idx * (track.querySelector('.carousel-item').offsetWidth + 10);
+          track.scrollTo({ left: scrollTo, behavior: 'smooth' });
+        });
+        dotsContainer.appendChild(dot);
+      });
+    }
+
+    function updateDots() {
+      const scrollLeft = track.scrollLeft;
+      const itemWidth = track.querySelector('.carousel-item').offsetWidth + 10;
+      const activeIndex = Math.round(scrollLeft / itemWidth);
+      const dots = document.querySelectorAll('#globalDots .dot');
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === activeIndex);
+      });
+    }
+
+    function addToCart(button, service) {
+      const parent = button.closest('.carousel-item');
+      const selects = parent.querySelectorAll('select');
+      const errorMessage = parent.querySelector('.error-message');
+
+      let valid = true;
+      const selectedOptions = [];
+      let basePrice = 0;
+
+      selects.forEach((select, i) => {
+        const selected = select.options[select.selectedIndex];
+        if (!selected.value) {
+          select.classList.add('invalid');
+          valid = false;
+        } else {
+          select.classList.remove('invalid');
+          selectedOptions.push(selected.value);
+          if (i === 0 && select.hasAttribute('data-price-select')) {
+            basePrice = parseFloat(selected.getAttribute('data-price')) || 0;
+          }
+        }
+      });
+
+      if (!valid) {
+        errorMessage.style.display = 'block';
+        return;
+      }
+
+      errorMessage.style.display = 'none';
+
+      const cartItems = document.getElementById('cartItems');
+      const listItem = document.createElement('li');
+      listItem.classList.add('cart-item');
+      listItem.dataset.price = basePrice;
+      listItem.innerHTML = `
+        <span>${service}: ${selectedOptions.join(', ')} - $${basePrice}</span>
+        <input type="number" value="1" min="1" onchange="updateTotal()">
+        <button class="remove-item" onclick="removeFromCart(this)">Remove</button>
+      `;
+      cartItems.appendChild(listItem);
+      updateTotal();
+    }
+
+    function removeFromCart(button) {
+      button.parentElement.remove();
+      updateTotal();
+    }
+
+    function updateTotal() {
+      const items = document.querySelectorAll('.cart-item');
+      let total = 0;
+      items.forEach(item => {
+        const price = parseFloat(item.dataset.price);
+        const qty = parseInt(item.querySelector('input').value);
+        total += price * qty;
+      });
+      document.getElementById('cartTotal').textContent = `Total: $${total.toFixed(2)}`;
+    }
+
+    function clearCart() {
+      document.getElementById('cartItems').innerHTML = '';
+      updateTotal();
+    }
+
+    function scrollCarousel(dir) {
+      const item = track.querySelector('.carousel-item');
+      const scrollAmount = item.offsetWidth + 10;
+      track.scrollBy({ left: scrollAmount * dir, behavior: 'smooth' });
+    }
+
+    track.addEventListener('scroll', () => {
+      window.requestAnimationFrame(updateDots);
     });
+
+    window.addEventListener('load', renderCarousel);
   </script>
 </body>
 </html>
