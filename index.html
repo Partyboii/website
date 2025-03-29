@@ -1,40 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Task Manager</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-        .container { padding: 20px; }
-        .date { font-size: 1.5em; margin-bottom: 20px; }
-        .task { margin: 10px 0; display: flex; align-items: center; }
-        .task input[type="checkbox"] { margin-right: 10px; }
-        .task.checked { text-decoration: line-through; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="date">March 29, 2025</div>
-        <div class="task">
-            <input type="checkbox" id="task1">
-            <label for="task1">Go grocery shopping</label>
-        </div>
-        <div class="task">
-            <input type="checkbox" id="task2">
-            <label for="task2">Work on business project</label>
-        </div>
-        <div class="task">
-            <input type="checkbox" id="task3">
-            <label for="task3">Cook dinner</label>
-        </div>
-    </div>
-    <script>
-        document.querySelectorAll('.task input[type="checkbox"]').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                this.parentElement.classList.toggle('checked', this.checked);
-            });
-        });
-    </script>
-</body>
-</html>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Minimal Daily Task Manager</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      height: 100%;
+      overflow: hidden;
+      background: #f5f5f5;
+    }
+
+    .day-container {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 30px 20px;
+      box-sizing: border-box;
+    }
+
+    .date-display {
+      font-size: 1.8em;
+      margin-top: 20px;
+    }
+
+    .task-list {
+      flex-grow: 1;
+      width: 100%;
+      overflow-y: auto;
+      margin: 20px 0;
+    }
+
+    .task {
+      background: white;
+      padding: 10px;
+      margin-bottom: 10 |oai:code-citation|
