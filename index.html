@@ -39,4 +39,131 @@
     .task {
       background: white;
       padding: 10px;
-      margin-bottom: 10 |oai:code-citation|
+      margin-bottom: 10px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+    }
+
+    .task input[type="checkbox"] {
+      margin-right: 10px;
+    }
+
+    .task.checked label {
+      text-decoration: line-through;
+    }
+
+    .task-input {
+      width: 100%;
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .task-input input {
+      flex-grow: 1;
+      padding: 8px;
+      font-size: 1em;
+    }
+
+    .task-input button {
+      padding: 8px 12px;
+      font-size: 1em;
+    }
+  </style>
+</head>
+<body>
+  <div class="day-container" id="dayContainer">
+    <div class="date-display" id="dateDisplay">March 29, 2025</div>
+
+    <div class="task-list" id="taskList"></div>
+
+    <div class="task-input">
+      <input type="text" id="newTask" placeholder="Add a task..." />
+      <button onclick="addTask()">Add</button>
+    </div>
+  </div>
+
+  <script>
+    let currentDate = new Date("March 29, 2025");
+    const dateDisplay = document.getElementById("dateDisplay");
+    const taskList = document.getElementById("taskList");
+
+    const taskStore = {};
+
+    function formatDate(date) {
+      return date.toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    function renderTasks() {
+      taskList.innerHTML = '';
+      const dateKey = formatDate(currentDate);
+      const tasks = taskStore[dateKey] || [];
+
+      tasks.forEach((task, index) => {
+        const taskDiv = document.createElement('div');
+        taskDiv.className = 'task' + (task.checked ? ' checked' : '');
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = task.checked;
+        checkbox.addEventListener('change', () => {
+          task.checked = checkbox.checked;
+          renderTasks();
+        });
+
+        const label = document.createElement('label');
+        label.textContent = task.text;
+
+        taskDiv.appendChild(checkbox);
+        taskDiv.appendChild(label);
+        taskList.appendChild(taskDiv);
+      });
+    }
+
+    function addTask() {
+      const input = document.getElementById("newTask");
+      const text = input.value.trim();
+      if (!text) return;
+
+      const dateKey = formatDate(currentDate);
+      if (!taskStore[dateKey]) taskStore[dateKey] = [];
+
+      taskStore[dateKey].push({ text, checked: false });
+      input.value = '';
+      renderTasks();
+    }
+
+    function updateDateDisplay() {
+      dateDisplay.textContent = formatDate(currentDate);
+      renderTasks();
+    }
+
+    // Swipe detection
+    let touchStartY = null;
+
+    document.body.addEventListener("touchstart", function(e) {
+      touchStartY = e.touches[0].clientY;
+    });
+
+    document.body.addEventListener("touchend", function(e) {
+      if (touchStartY === null) return;
+
+      const touchEndY = e.changedTouches[0].clientY;
+      const diff = touchStartY - touchEndY;
+
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) {
+          currentDate.setDate(currentDate.getDate() + 1);
+        } else {
+          currentDate.setDate(currentDate.getDate() - 1);
+        }
+        updateDateDisplay();
+      }
+      touchStartY = null;
+    });
+
+    updateDateDisplay();
+  </script>
+</body>
+</html>
